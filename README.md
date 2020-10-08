@@ -27,7 +27,7 @@ You will need a GitHub account ([create one][joinGitHub]) to collaborate.
 
 ### The platform
 
-**User logins:** KIT Shibboleth (if possible -> ask SCC) or using `uxxxx.student@kit.edu` mails.
+**User logins:** KIT Shibboleth (if possible -> ask SCC) or using `uxxxx@student.kit.edu` mails.
 
 **General Content:** Markdown formatting (-> we need a md-parser)
 
