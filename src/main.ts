@@ -12,5 +12,5 @@ app.use("/recipe", recipeRouter)
 app.use("/", landingRouter)
 
 app.listen(config.port, () => {
-  console.log("Server listening on port 80")
+  console.log("Server listening on port " + config.port)
 })
