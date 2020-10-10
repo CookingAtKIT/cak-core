@@ -20,6 +20,8 @@ Make sure you have the `prettier` plugin installed on your IDE for code formatti
 
 ## Contributing
 
+Before contributing, please read the [code of conduct](CODE_OF_CONDUCT.md) or [contribution guidlines](CONTRIBUTING.md)
+
 If you spot a bug, an error or have an idea for a feature, you may create a [new issue][new-issue].
 
 Pull-requests are welcome and necessary.
@@ -41,10 +43,7 @@ You will need a GitHub account ([create one][joingithub]) to collaborate.
 
 Enforced via the `prettier` plugin. Make sure you have it installed (available for VS Code and IntelliJ [...])
 
-## License
-
-Private for now, likely [MIT](https://choosealicense.com/licenses/mit/), once
-we make the repository public (likely around `v1.0.0`).
+## [License](LICENSE)
 
 [new-issue]: https://github.com/CookingAtKIT/cak-core/issues/new
 [joingithub]: https://github.com/join
