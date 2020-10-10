@@ -14,11 +14,11 @@ services:
       MONGO_INITDB_ROOT_USERNAME: key
       MONGO_INITDB_ROOT_PASSWORD: secret
     volumes:
-    - mongoData: /data/db
+    - mongoData:/data/db
   minio:
     image: minio/minio
     volumes:
-    - minioData: /data
+    - minioData:/data
     environment:
       MINIO_ACCESS_KEY: key
       MINIO_SECRET_KEY: secret
@@ -28,5 +28,5 @@ services:
       timeout: 20s
       retries: 3
 volumes:
-  minioData:
-  mongoData:
+  minioData: {}
+  mongoData: {}
