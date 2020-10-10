@@ -7,8 +7,10 @@ export interface Config {
 }
 
 export function loadConfig() {
-  const file = fs.readFileSync(path.resolve(__dirname + "../../../config.yaml"), "utf8")
-  const config = yaml.parse(file)
+  const port = process.env.PORT || 3000
+  const config = {
+    port: port
+  }
 
   if (!("port" in config) || typeof config.port !== "number")
     throw new TypeError("Invalid config file: port must be defined and must be a number")
