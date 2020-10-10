@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  web:
+    build: .
+    ports:
+      - "42088:42088"
+    volumes:
+    links:
+      - mongo
+      - minio
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: key
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    volumes:
+    - mongoData: /data/db
+  minio:
+    image: minio/minio
+    volumes:
+    - minioData: /data
+    environment:
+      MINIO_ACCESS_KEY: key
+      MINIO_SECRET_KEY: secret
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+volumes:
+  minioData:
+  mongoData:
