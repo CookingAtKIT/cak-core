@@ -8,4 +8,4 @@ RUN yarn
 RUN npm run tsc
 CMD ["npm", "start"]
 
-EXPOSE 42088
+EXPOSE 2999
