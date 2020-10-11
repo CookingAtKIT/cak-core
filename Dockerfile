@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 RUN yarn
-RUN npx tsc
-CMD ["npm", "start"]
+RUN yarn build
+CMD ["yarn", "start"]
 
 EXPOSE 2999
