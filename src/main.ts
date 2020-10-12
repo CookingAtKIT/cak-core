@@ -1,16 +1,16 @@
-import express from "express"
-import { loadConfig } from "./structs/config"
+import express from "express";
+import { loadConfig } from "./structs/config";
 
 // Express Routers
-import landingRouter from "./routes/index"
-import recipeRouter from "./routes/recipe"
+import landingRouter from "./routes/index";
+import recipeRouter from "./routes/recipe";
 
-const app = express()
-const config = loadConfig()
+const app = express();
+const config = loadConfig();
 
-app.use("/recipe", recipeRouter)
-app.use("/", landingRouter)
+app.use("/recipe", recipeRouter);
+app.use("/", landingRouter);
 
 app.listen(config.port, () => {
-  console.log("Server listening on port " + config.port)
-})
+  console.log("Server listening on port " + config.port);
+});
