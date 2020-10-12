@@ -6,7 +6,8 @@ const userSchema = new Schema<IUserSchema>({
   created: Date,
   email: String,
   username: String,
-  password: String
+  password: String,
+  salt: String
 });
 
 export const User = model("User", userSchema);
