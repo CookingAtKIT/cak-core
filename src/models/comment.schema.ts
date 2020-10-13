@@ -2,7 +2,6 @@ import { model, Schema, Types } from "mongoose";
 import { ICommentSchema } from "./comment.types";
 
 const commentSchema = new Schema<ICommentSchema>({
-  _id: Types.ObjectId,
   author: Types.ObjectId,
   flags: [Types.ObjectId],
   message: String,
@@ -10,4 +9,4 @@ const commentSchema = new Schema<ICommentSchema>({
   imgs: [Types.ObjectId]
 });
 
-export const Comment = model("Comment", commentSchema);
+export const Comment = model<ICommentSchema>("Comment", commentSchema);

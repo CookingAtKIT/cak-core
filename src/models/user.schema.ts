@@ -2,7 +2,6 @@ import { model, Schema, Types } from "mongoose";
 import { IUserSchema } from "./user.types";
 
 const userSchema = new Schema<IUserSchema>({
-  _id: Types.ObjectId,
   created: Date,
   email: String,
   username: String,
@@ -10,4 +9,4 @@ const userSchema = new Schema<IUserSchema>({
   salt: String
 });
 
-export const User = model("User", userSchema);
+export const User = model<IUserSchema>("User", userSchema);
