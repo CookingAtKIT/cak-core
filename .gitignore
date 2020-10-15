@@ -1,4 +1,11 @@
+# WebStorm Editor Configuration
 .idea
+
+# Transpiled Files
 out
+
+# Environment Variables
+.env
+
 node_modules
 config.yaml
