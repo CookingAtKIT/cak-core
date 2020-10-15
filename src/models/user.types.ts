@@ -5,5 +5,6 @@ export interface IUserSchema extends Document {
   email: string;
   username: string;
   password: string;
+  token: string;
   salt: string;
 }
