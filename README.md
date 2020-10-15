@@ -10,6 +10,8 @@ Then, use yarn to install the required modules. **Please do not use `npm install
 
 Use yarn commands `dev`, `build` and `start`.
 
+Before running, rename `.env_example` to `.env` and replace the standard parameters with your testing credentials.
+
 - `dev` runs the code with `ts-node` (does not update files in the `out` dir)
 - `build` transpiles the code to javascript (outputs to the `out` dir)
 - `start` runs the javascript in the `out` dir
