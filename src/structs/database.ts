@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Client, BucketItem } from "minio";
+import { Client } from "minio";
 
 mongoose.connect("mongodb+srv://root:root@test.czgw0.mongodb.net/sample_airbnb?retryWrites", {
   useNewUrlParser: true

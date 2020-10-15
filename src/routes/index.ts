@@ -24,7 +24,7 @@ router.get("/health", (req, res) => {
 
   // Check the minio server for health
   const minioHealthRequest = http.request(minioHealthRequestOptions, (response) => {
-    res.send({
+    res.json({
       mongodb: db.readyState === 1,
       minio: response.statusCode === 200
     });
@@ -32,7 +32,7 @@ router.get("/health", (req, res) => {
   });
 
   minioHealthRequest.on("timeout", () => {
-    res.send({
+    res.json({
       mongodb: db.readyState === 1,
       minio: false
     });
