@@ -1,17 +1,20 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose, { mongo, Schema } from "mongoose";
 import { Client } from "minio";
 import { minioConfig as getMinioConfig, mongoConfig as getMongoConfig } from "./config";
+import { User } from "../models/user.schema";
 
-// MongoDB Setup
-
+// MongoDB Configuration
 const mongoConfig = getMongoConfig();
 
-mongoose.connect(
-  `mongodb+srv://${mongoConfig.username}:${mongoConfig.password}@${mongoConfig.server}/${
-    mongoConfig.path
-  }${mongoConfig.retryRewrites ? "?retryRewrites" : ""}`,
-  {
-    useNewUrlParser: true
+// generate ConnectionString
+const mongoConnectionString = `mongodb://${mongoConfig.server}:${mongoConfig.port}/`;
+
+//
+mongoose.connect(mongoConnectionString, { useNewUrlParser: true }).then(
+  (value) => {},
+  (reason) => {
+    console.warn("MongoDB Connection failed!");
+    console.error(reason);
   }
 );
 
@@ -24,10 +27,13 @@ db.once("open", function () {
 
 // Minio Setup
 
+const minioConfig = getMinioConfig();
+/*
 export const os = new Client({
-  endPoint: "play.min.io",
-  port: 9000,
-  useSSL: true,
-  accessKey: "Q3AM3UQ867SPQQA43P2F",
-  secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+  endPoint: minioConfig.endPoint,
+  port: minioConfig.port,
+  useSSL: minioConfig.useSSL,
+  accessKey: minioConfig.accessKey,
+  secretKey: minioConfig.secretKey
 });
+ */

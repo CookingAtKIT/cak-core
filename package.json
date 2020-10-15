@@ -6,10 +6,13 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@types/crypto-js": "^4.0.1",
     "@types/express": "^4.17.8",
     "@types/minio": "^7.0.6",
     "@types/mongoose": "^5.7.36",
     "@types/node": "^14.11.8",
+    "crypto-js": "^4.0.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "minio": "^7.0.16",
     "mongoose": "^5.10.9",

@@ -1,3 +1,8 @@
+import * as dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.join(__dirname, "../../.env") });
+
 export interface Config {
   port: number;
 }
@@ -21,11 +26,11 @@ export interface MongoConfiguration {
 
 export function loadConfig(): Config {
   const port = process.env.PORT || 3000;
-  const config = {
-    port: port
+  const config: Config = {
+    port: Number(port)
   };
 
-  if (!("port" in config) || typeof config.port !== "number")
+  if (!("port" in config))
     throw new TypeError("Invalid config file: port must be defined and must be a number");
 
   return config as Config;
@@ -52,6 +57,8 @@ export function mongoConfig(): MongoConfiguration {
     username: process.env.MONGO_USERNAME || "",
     password: process.env.MONGO_PASSWORD || ""
   };
+
+  console.log(config);
 
   return config as MongoConfiguration;
 }

@@ -10,7 +10,18 @@ router.get("/", (req, res) => {
   res.end("Try /recipe");
 });
 
-router.get("/health", (req, res) => {
+router.get("/status/mongo", (req, res) => {
+  res.json({
+    mongodb: db.readyState === 1
+  });
+  res.end();
+});
+
+router.get("/status/minio", (req, res) => {
+  res.end("Try /recipe");
+});
+
+router.get("/status", (req, res) => {
   // Send back sattus code 200, the API is live.
   res.status(200);
 
