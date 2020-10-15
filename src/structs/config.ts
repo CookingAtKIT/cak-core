@@ -10,6 +10,15 @@ export interface MinioConfiguration {
   secretKey: string;
 }
 
+export interface MongoConfiguration {
+  server: string;
+  port: number;
+  path: string;
+  username: string;
+  password: string;
+  retryRewrites: boolean;
+}
+
 export function loadConfig(): Config {
   const port = process.env.PORT || 3000;
   const config = {
@@ -24,12 +33,25 @@ export function loadConfig(): Config {
 
 export function minioConfig(): MinioConfiguration {
   const config = {
-    endPoint: "play.min.io",
-    port: 9000,
-    useSSL: true,
-    accessKey: "Q3AM3UQ867SPQQA43P2F",
-    secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+    endPoint: process.env.MINIO_ENDPOINT || "",
+    port: process.env.MINIO_PORT || 9000,
+    useSSL: process.env.MINIO_USE_SSL || true,
+    accessKey: process.env.MINIO_ACCESS_KEY || "",
+    secretKey: process.env.MINIO_SECRET_KEY || ""
   };
 
   return config as MinioConfiguration;
+}
+
+export function mongoConfig(): MongoConfiguration {
+  const config = {
+    server: process.env.MONGO_ENDPOINT || "localhost",
+    port: process.env.MONGO_PORT || 27017,
+    path: process.env.MONGO_PATH || "/",
+    retryRewrites: process.env.MONGO_RETRY_WRITES || true,
+    username: process.env.MONGO_USERNAME || "",
+    password: process.env.MONGO_PASSWORD || ""
+  };
+
+  return config as MongoConfiguration;
 }
