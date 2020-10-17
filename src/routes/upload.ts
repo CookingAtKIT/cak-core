@@ -15,20 +15,29 @@ router.post("/upload", (req, res) => {
   //const type = req.body.type; //image file type
   const rawData = req.body.data;  // Get raw base64 data
   const type = detectMimeType(rawData); // Get file extension from base64 data
-  const data = new Buffer(rawData, "base64"); // Build Buffer from base64 data
+  const data = Buffer.from(rawData, "base64"); // Build Buffer from base64 data
 
   // Hash the Buffer to check for database entry with same hash
   const hash = crypto.createHash('md5').update(data).digest('hex');
 
   Image.findOne({hash: hash}, (err, element) => {
+    if(err) {
+      res.status(500);
+      res.json({ error: "Internal Sever Error: Database", description: err });
+      res.end();
+    }
 
-    if(element === undefined || element === null) { // No Element found, create new one
+    if(!element) { // No Element found, create new one
       Image.create({type, hash}).then(value => {  // Create new Database entry
         const _id = value._id as mongoose.Types.ObjectId; // Get created _id
         os.bucketExists(bucketName).then(bucketExists => {  // Check if Minio Bucket exists
           if ( !bucketExists ) {
             os.makeBucket(bucketName, "", error => {  // Create Minio Bucket
-              if( error ) return console.log("error while creating bucket.", error);
+              if( error ) {
+                res.status(500);
+                res.json({ error: "Internal Sever Error: Database", description: err });
+                res.end();
+              }
               os.putObject(bucketName, `${_id}.${type}`, data).then(r => {
                 res.json({id: _id});
                 res.end();
@@ -44,6 +53,7 @@ router.post("/upload", (req, res) => {
       });
     } else {
       res.json({id: element._id});  //Return if from first entry with same hash
+      res.end();
     }
 
   });
