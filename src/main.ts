@@ -10,8 +10,10 @@ import recipeRouter from "./routes/recipe";
 const app = express();
 const config = loadConfig();
 
+app.use(express.json());
 app.use(logger);
 app.use(cors());
+
 
 app.use("/recipe", recipeRouter);
 app.use("/", landingRouter);
