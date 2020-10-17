@@ -37,6 +37,7 @@ router.post("/upload", (req, res) => {
                 res.status(500);
                 res.json({ error: "Internal Sever Error: Database", description: err });
                 res.end();
+                return;
               }
               os.putObject(bucketName, `${_id}.${type}`, data).then(r => {
                 res.json({id: _id});
