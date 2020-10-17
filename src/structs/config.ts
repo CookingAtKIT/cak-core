@@ -24,6 +24,16 @@ export interface MongoConfiguration {
   retryRewrites: boolean;
 }
 
+export interface MailConfiguration {
+  host: string;
+  port: number;
+  auth: {
+    user: string;
+    pass: string;
+  };
+  senderAddress: string;
+}
+
 export function loadConfig(): Config {
   const port = process.env.PORT || 3000;
   const config: Config = {
@@ -58,7 +68,20 @@ export function mongoConfig(): MongoConfiguration {
     password: process.env.MONGO_PASSWORD || ""
   };
 
-  console.log(config);
-
   return config as MongoConfiguration;
+}
+
+export function mailConfig() {
+  const config: MailConfiguration = {
+    host: process.env.MAIL_SMTP_SERVER || "",
+    port: Number(process.env.MAIL_SMTP_PORT) || 2525,
+    auth: {
+      user: process.env.MAIL_SMTP_USERNAME || "",
+      pass: process.env.MAIL_SMTP_PASSWORD || ""
+    },
+    senderAddress:
+      process.env.MAIL_SENDERADDRESS || "noreply@" + (process.env.MAIL_SMTP_SERVER || "")
+  };
+
+  return config;
 }
