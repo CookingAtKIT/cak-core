@@ -6,6 +6,7 @@ const userSchema = new Schema<IUserSchema>({
   email: String,
   username: String,
   password: String,
+  token: String,
   salt: String
 });
 
