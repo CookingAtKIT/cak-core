@@ -1,6 +1,8 @@
 import { Document } from "mongoose";
 
-export interface IImageSchema extends Document {
+export interface IImageSchema {
   hash: string;
   type: string;
 }
+
+export interface IImage extends IImageSchema, Document {}

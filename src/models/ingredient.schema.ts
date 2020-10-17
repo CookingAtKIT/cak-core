@@ -1,12 +1,12 @@
 import { model, Schema, Types } from "mongoose";
-import { IIngredientSchema } from "./ingredient.types";
+import { IIngredient } from "./ingredient.types";
 
-const ingredientSchema = new Schema<IIngredientSchema>({
-  displayname: String,
-  allergene: [Types.ObjectId],
-  unit: Types.ObjectId,
+const ingredientSchema = new Schema<IIngredient>({
+  displayname: { type: String, required: true },
+  allergene: [{ type: Types.ObjectId, ref: "Allergen" }],
+  unit: { type: Types.ObjectId, ref: "Unit", required: true },
   kcal: Number,
   reweLink: String
 });
 
-export const Ingredient = model<IIngredientSchema>("Ingredient", ingredientSchema);
+export const Ingredient = model<IIngredient>("Ingredient", ingredientSchema);

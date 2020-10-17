@@ -1,9 +1,9 @@
-import { model, Schema, Types } from "mongoose";
-import { IImageSchema } from "./image.types";
+import { model, Schema } from "mongoose";
+import { IImage } from "./image.types";
 
-const imageSchema = new Schema<IImageSchema>({
-  hash: String,
-  type: String
+const imageSchema = new Schema<IImage>({
+  hash: { type: String, required: true },
+  type: { type: String, required: true }
 });
 
-export const Image = model<IImageSchema>("Image", imageSchema);
+export const Image = model<IImage>("Image", imageSchema);

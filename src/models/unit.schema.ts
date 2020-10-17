@@ -1,8 +1,8 @@
-import { model, Schema, Types } from "mongoose";
-import { IUnitSchema } from "./unit.types";
+import { model, Schema } from "mongoose";
+import { IUnit } from "./unit.types";
 
-const unitSchema = new Schema<IUnitSchema>({
-  type: String
+const unitSchema = new Schema<IUnit>({
+  name: { type: String, required: true }
 });
 
-export const Unit = model<IUnitSchema>("Unit", unitSchema);
+export const Unit = model<IUnit>("Unit", unitSchema);
