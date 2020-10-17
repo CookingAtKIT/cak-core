@@ -29,7 +29,8 @@ router.post("/upload", (req, res) => {
 
     if (!element) {
       // No Element found, create new one
-      Image.create({ type, hash }).then((value) => {
+      // TODO: Use actual uploader
+      Image.create({ type, hash, uploader: "none" }).then((value) => {
         // Create new Database entry
         const _id = value._id as mongoose.Types.ObjectId; // Get created _id
         os.bucketExists(bucketName).then((bucketExists) => {
