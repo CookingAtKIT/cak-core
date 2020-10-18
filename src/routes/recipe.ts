@@ -95,6 +95,23 @@ router.post("/edit/:id", async (req, res) => {
                 updates.push({ $set: { public: update.value } });
               }
               break;
+            case "portion":
+              {
+                updates.push({ $set: { portions: update.value } });
+              }
+              break;
+            case "ingredient":
+              {
+                updates.push({
+                  $addToSet: { ingredient: update.value.id, amount: update.value.amount }
+                });
+              }
+              break;
+            case "step":
+              {
+                updates.push({ $addToSet: update.value });
+              }
+              break;
           }
         }
 
