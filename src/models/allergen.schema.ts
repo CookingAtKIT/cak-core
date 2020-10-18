@@ -1,8 +1,8 @@
-import { model, Schema, Types } from "mongoose";
-import { IAllergenSchema } from "./allergen.types";
+import { model, Schema } from "mongoose";
+import { IAllergen } from "./allergen.types";
 
-const allergenSchema = new Schema<IAllergenSchema>({
-  displayname: String
+const allergenSchema = new Schema<IAllergen>({
+  name: { type: String, required: true }
 });
 
-export const Allergen = model<IAllergenSchema>("Allergen", allergenSchema);
+export const Allergen = model<IAllergen>("Allergen", allergenSchema);

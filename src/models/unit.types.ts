@@ -10,6 +10,8 @@ export enum EIngredientUnit {
   tbls = "tbls"
 }
 
-export interface IUnitSchema extends Document {
-  type: string | EIngredientUnit;
+export interface IUnitSchema {
+  name: string | EIngredientUnit;
 }
+
+export interface IUnit extends IUnitSchema, Document {}
