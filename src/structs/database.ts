@@ -1,7 +1,6 @@
 import mongoose, { mongo, Schema } from "mongoose";
 import { Client } from "minio";
 import { minioConfig as getMinioConfig, mongoConfig as getMongoConfig } from "./config";
-import { User } from "../models/user.schema";
 
 // MongoDB Configuration
 const mongoConfig = getMongoConfig();
@@ -28,7 +27,7 @@ db.once("open", function () {
 // Minio Setup
 
 const minioConfig = getMinioConfig();
-/*
+
 export const os = new Client({
   endPoint: minioConfig.endPoint,
   port: minioConfig.port,
@@ -36,4 +35,3 @@ export const os = new Client({
   accessKey: minioConfig.accessKey,
   secretKey: minioConfig.secretKey
 });
- */
