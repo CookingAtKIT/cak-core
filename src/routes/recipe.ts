@@ -70,7 +70,50 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.post("/edit/:id", (req, res) => {});
+router.post("/edit/:id", async (req, res) => {
+  const request: { token: string; updates: { type: string; value: any }[] } = req.body;
+  if (request.hasOwnProperty("token")) {
+    const token = request.token;
+    const uploader = await User.findOne({ token });
+
+    if (uploader) {
+      const recipeId = req.params.id;
+      const condition = { _id: Types.ObjectId(recipeId) };
+      const recipe = await Recipe.findOne(condition);
+      if (recipe) {
+        const updates = [];
+        res.status(200);
+        for (let update of request.updates) {
+          switch (update.type) {
+            case "title":
+              {
+                updates.push({ $set: { title: update.value } });
+              }
+              break;
+            case "public":
+              {
+                updates.push({ $set: { public: update.value } });
+              }
+              break;
+          }
+        }
+
+        updates.push({ $currentDate: "$edited" });
+        await Recipe.updateOne(condition, updates);
+      } else {
+        res.status(404);
+        res.json({ error: "Not Found", description: `No recipe with id ${recipeId} found` });
+      }
+    } else {
+      res.status(401);
+      res.json({ error: "Unauthorized", description: "User token invalid" });
+    }
+  } else {
+    res.status(401);
+    res.json({ error: "Unauthorized", description: "User token not provided" });
+  }
+  res.end();
+});
 
 router.post("/create", async (req, res) => {
   const request: { token: string; title: string } = req.body;
@@ -91,7 +134,7 @@ router.post("/create", async (req, res) => {
         portions: -1,
         comments: []
       });
-      res.status(200);
+      res.status(201);
       res.json({ id: data._id });
     } else {
       res.status(401);
