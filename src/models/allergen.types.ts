@@ -1,5 +1,7 @@
 import { Document } from "mongoose";
 
-export interface IAllergenSchema extends Document {
-  displayname: string;
+export interface IAllergenSchema {
+  name: string;
 }
+
+export interface IAllergen extends IAllergenSchema, Document {}

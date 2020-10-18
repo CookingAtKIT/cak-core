@@ -1,15 +1,15 @@
-import { model, Schema, Types } from "mongoose";
-import { IUserSchema } from "./user.types";
+import { model, Schema } from "mongoose";
+import { IUser } from "./user.types";
 
-const userSchema = new Schema<IUserSchema>({
-  created: Date,
-  email: String,
-  username: String,
-  password: String,
-  surname: String,
-  name: String,
-  token: String,
-  salt: String
+const userSchema = new Schema<IUser>({
+  created: { type: Date, required: true },
+  email: { type: String, required: true },
+  username: { type: String, required: true },
+  password: { type: String, required: true },
+  surname: { type: String, required: true },
+  name: { type: String, required: true },
+  token: { type: String, required: true },
+  salt: { type: String, required: true }
 });
 
-export const User = model<IUserSchema>("User", userSchema);
+export const User = model<IUser>("User", userSchema);
