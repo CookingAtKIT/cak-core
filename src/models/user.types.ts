@@ -1,6 +1,6 @@
 import { Document } from "mongoose";
 
-export interface IUserSchema extends Document {
+export interface IUserSchema {
   created: Date;
   email: string;
   username: string;
@@ -10,3 +10,5 @@ export interface IUserSchema extends Document {
   token: string;
   salt: string;
 }
+
+export interface IUser extends IUserSchema, Document {}
