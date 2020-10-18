@@ -8,7 +8,13 @@ import { User } from "../models/user.schema";
 const router = Router();
 const bucketName = "";
 
-router.post("/upload", async (req, res) => {
+router.post("", async (req, res) => {
+  if (!req.body.hasOwnProperty("token")) {
+    res.status(401);
+    res.json({ error: "Unauthorized", description: "User token not provided" });
+    res.end();
+    return;
+  }
   const token = req.body.token;
 
   const uploader = await User.findOne({ token });
