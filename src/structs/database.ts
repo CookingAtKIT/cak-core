@@ -7,7 +7,7 @@ import { User } from "../models/user.schema";
 const mongoConfig = getMongoConfig();
 
 // generate ConnectionString
-const mongoConnectionString = `mongodb://${mongoConfig.server}:${mongoConfig.port}/`;
+const mongoConnectionString = `mongodb://${mongoConfig.server}:${mongoConfig.port}/cak_test`;
 
 //
 mongoose.connect(mongoConnectionString, { useNewUrlParser: true }).then(

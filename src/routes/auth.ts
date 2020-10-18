@@ -16,8 +16,8 @@ function generateSalt(length: number) {
   return result;
 }
 
-function generateMailAuthToken(length: number) {
-  Math.random()
+function generateMailAuthToken(length: number): string {
+  return Math.random()
     .toString()
     .substring(2, 2 + length);
 }
@@ -74,8 +74,81 @@ router.post("/login", (req, res) => {
   }
 });
 
-router.post("/verify", async (req, res) => {
+router.post("/requestVerification", async (req, res) => {
   if (req.body.hasOwnProperty("emailcode")) {
+    const emailcode = req.body.emailcode;
+
+    const registerCode = generateMailAuthToken(3);
+    const registerToken = generateRandomToken();
+
+    const dbCode = await UserCode.findOne({ emailcode: emailcode });
+
+    if (dbCode) {
+      res.status(409);
+      res.json({
+        error: "Conflict",
+        description: "The Email is already in use"
+      });
+      return;
+    }
+
+    await UserCode.create({
+      created: Date(),
+      emailcode: emailcode,
+      code: registerCode,
+      token: registerToken,
+      verified: false
+    });
+
+    const mailStatusCode = await sendVerificationMessage(
+      emailcode + "@student.kit.edu",
+      registerCode
+    );
+
+    if (mailStatusCode === 500) {
+      res.status(500);
+      res.json({
+        error: "Internal Server Error: Mail",
+        description: "An internal Error occured. Perhaps the provided mail address was incorrect."
+      });
+      return;
+    } else {
+      res.status(200);
+      res.json({
+        token: registerToken
+      });
+    }
+  } else {
+    res.status(400);
+    res.json({
+      error: "Bad Request",
+      description: "Incomplete request"
+    });
+  }
+});
+
+router.post("/verify", async (req, res) => {
+  if (req.body.hasOwnProperty("authtoken") && req.body.hasOwnProperty("authcode")) {
+    const authtoken = req.body.authtoken;
+    const authcode = req.body.authcode;
+
+    const validCode = await UserCode.findOne({ token: authtoken, code: authcode });
+
+    if (validCode) {
+      // The token and code match
+      UserCode.updateOne({ token: authtoken, code: authcode }, { verified: true });
+
+      res.status(200);
+      res.json({
+        success: true
+      });
+    } else {
+      res.status(401);
+      res.json({
+        error: "Unauthorized",
+        description: "The provided code seems to be invalid"
+      });
+    }
   } else {
     res.status(400);
     res.json({
@@ -92,17 +165,17 @@ router.post("/register", async (req, res) => {
     req.body.hasOwnProperty("password") &&
     req.body.hasOwnProperty("surname") &&
     req.body.hasOwnProperty("name") &&
-    req.body.hasOwnProperty("emailcode") &&
+    req.body.hasOwnProperty("email") &&
     req.body.hasOwnProperty("authtoken")
   ) {
     // Request Data
-    let username = req.body.username;
-    let password = req.body.password;
-    let surname = req.body.surname;
-    let name = req.body.name;
-    let emailcode = req.body.emailcode;
-    let authtoken = req.body.authtoken;
-    let salt = generateSalt(6);
+    const username = req.body.username;
+    const password = req.body.password;
+    const surname = req.body.surname;
+    const name = req.body.name;
+    const email = req.body.email;
+    const authtoken = req.body.authtoken;
+    const salt = generateSalt(6);
 
     const dbUserName = await User.findOne({ username: username });
 
@@ -112,42 +185,32 @@ router.post("/register", async (req, res) => {
       return;
     }
 
-    const dbUserMail = await User.findOne({ email: emailcode + "@student.kit.edu" });
+    const dbUserMail = await User.findOne({ email: email });
 
-    if (dbUserMail !== null) {
+    if (dbUserMail) {
       res.status(409);
       res.json({ error: "Conflict", description: "email" });
       return;
     }
 
-    const mailStatusCode = await sendVerificationMessage(emailcode, 123);
+    const newAuthToken = generateRandomToken();
 
-    if (mailStatusCode === 500) {
-      res.status(500);
-      res.json({
-        error: "Internal Server Error: Mail",
-        description: "An internal Error occured. Perhaps the provided mail address was incorrect."
-      });
-      return;
-    } else {
-      const randomToken = generateMailAuthToken(3);
-      const registerToken = generateRandomToken();
+    await User.create({
+      created: Date(),
+      email: email,
+      username: username,
+      password: CryptoJS.SHA256(password + salt).toString(),
+      surname: surname,
+      name: name,
+      token: newAuthToken,
+      salt: salt
+    });
 
-      const userCode = await UserCode.insertMany([
-        {
-          created: Date(),
-          emailcode: emailcode,
-          code: randomToken,
-          token: registerToken
-        }
-      ]);
-
-      res.status(200);
-      res.json({
-        emailcode: emailcode,
-        token: registerToken
-      });
-    }
+    res.status(201);
+    res.json({
+      success: true,
+      token: newAuthToken
+    });
   } else {
     res.status(400);
     res.json({

@@ -5,10 +5,10 @@ let config = mailConfig();
 
 export const transport = nodemailer.createTransport(config);
 
-export async function sendVerificationMessage(mailcode: string, authcode: number): Promise<number> {
+export async function sendVerificationMessage(email: string, authcode: string): Promise<number> {
   const message = {
     from: config.senderAddress,
-    to: mailcode + "@student.kit.edu",
+    to: email,
     subject: "KITchen Bestätigungscode: " + authcode,
     text: `Dein KITchen Bestätigungscode ist: ${authcode}\nDiesen Code musst du bei der Registrierung eingeben.\nBitte antworte nicht auf diese Nachricht.`
   };
