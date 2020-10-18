@@ -3,14 +3,22 @@ import { os } from "../structs/database";
 import mongoose from "mongoose";
 import { Image } from "../models/image.schema";
 import * as crypto from "crypto";
+import { User } from "../models/user.schema";
 
 const router = Router();
 const bucketName = "";
 
-router.post("/upload", (req, res) => {
-  const userToken = req.body.token;
+router.post("/upload", async (req, res) => {
+  const token = req.body.token;
 
-  //todo Check auth here
+  const uploader = await User.findOne({ token });
+
+  if (!uploader) {
+    res.status(401);
+    res.json({ error: "Unauthorized", description: "User token invalid" });
+    res.end();
+    return;
+  }
 
   //const type = req.body.type; //image file type
   const rawData = req.body.data; // Get raw base64 data
@@ -25,11 +33,13 @@ router.post("/upload", (req, res) => {
       res.status(500);
       res.json({ error: "Internal Sever Error: Database", description: err });
       res.end();
+      return;
     }
 
     if (!element) {
       // No Element found, create new one
-      Image.create({ type, hash }).then((value) => {
+      Image.create({ type, hash, uploader: uploader._id }).then((value) => {
+        //todo replace id with user
         // Create new Database entry
         const _id = value._id as mongoose.Types.ObjectId; // Get created _id
         os.bucketExists(bucketName).then((bucketExists) => {
