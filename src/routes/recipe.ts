@@ -50,6 +50,7 @@ router.get("/:id", (req, res) => {
         }
 
         const response = {
+          id: recipe._id.toHexString(),
           public: recipe.public,
           flags: recipe.flags.length,
           title: recipe.title,
@@ -79,47 +80,58 @@ router.post("/edit/:id", async (req, res) => {
     if (uploader) {
       const recipeId = req.params.id;
       const condition = { _id: Types.ObjectId(recipeId) };
-      const recipe = await Recipe.findOne(condition);
-      if (recipe) {
-        const updates = [];
-        res.status(200);
-        for (let update of request.updates) {
-          switch (update.type) {
-            case "title":
-              {
-                updates.push({ $set: { title: update.value } });
-              }
-              break;
-            case "public":
-              {
-                updates.push({ $set: { public: update.value } });
-              }
-              break;
-            case "portion":
-              {
-                updates.push({ $set: { portions: update.value } });
-              }
-              break;
-            case "ingredient":
-              {
-                updates.push({
-                  $addToSet: { ingredient: update.value.id, amount: update.value.amount }
-                });
-              }
-              break;
-            case "step":
-              {
-                updates.push({ $addToSet: update.value });
-              }
-              break;
-          }
-        }
+      try {
+        const recipe = await Recipe.findOne(condition);
 
-        updates.push({ $currentDate: "$edited" });
-        await Recipe.updateOne(condition, updates);
-      } else {
-        res.status(404);
-        res.json({ error: "Not Found", description: `No recipe with id ${recipeId} found` });
+        if (recipe) {
+          const updates = [];
+          res.status(200);
+          for (let update of request.updates) {
+            switch (update.type) {
+              case "title":
+                {
+                  updates.push({ $set: { title: update.value } });
+                }
+                break;
+              case "public":
+                {
+                  updates.push({ $set: { public: update.value } });
+                }
+                break;
+              case "portion":
+                {
+                  updates.push({ $set: { portions: update.value } });
+                }
+                break;
+              case "ingredient":
+                {
+                  updates.push({
+                    $addToSet: {
+                      ingredient: Types.ObjectId(update.value.id),
+                      amount: update.value.amount
+                    }
+                  });
+                }
+                break;
+              case "step":
+                {
+                  updates.push({ $addToSet: update.value });
+                }
+                break;
+            }
+          }
+
+          updates.push({ $currentDate: "$edited" });
+          await Recipe.updateOne(condition, updates);
+          res.status(200);
+          res.json({ edits: updates });
+        } else {
+          res.status(404);
+          res.json({ error: "Not Found", description: `No recipe with id ${recipeId} found` });
+        }
+      } catch (e) {
+        res.status(500);
+        res.json({ error: "Internal Server Error", description: "Error while querying database" });
       }
     } else {
       res.status(401);
