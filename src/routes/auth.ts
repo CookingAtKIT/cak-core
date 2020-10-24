@@ -42,7 +42,7 @@ router.post("/login", (req, res) => {
         res.status(500);
         res.json({ error: "Internal Sever Error: Database", description: err });
         res.end();
-      } else if (element == undefined) {
+      } else if (!element) {
         // No element found => username not found
         res.status(403);
         res.json({ error: "Unauthorized", description: "Invalid Username" });
@@ -56,12 +56,10 @@ router.post("/login", (req, res) => {
           res.json({
             token: element.token
           });
-          res.end();
         } else {
           // Wrong password
           res.status(403);
           res.json({ error: "Unauthorized", description: "Wrong Password" });
-          res.end();
         }
       }
     });
@@ -75,147 +73,174 @@ router.post("/login", (req, res) => {
 });
 
 router.post("/requestVerification", async (req, res) => {
-  if (req.body.hasOwnProperty("emailcode")) {
-    const emailcode = req.body.emailcode;
+  try {
+    if (req.body.hasOwnProperty("emailcode")) {
+      const emailcode = req.body.emailcode;
 
-    const registerCode = generateMailAuthToken(3);
-    const registerToken = generateRandomToken();
+      const registerCode = generateMailAuthToken(3);
+      const registerToken = generateRandomToken();
 
-    const dbCode = await UserCode.findOne({ emailcode: emailcode });
+      const dbCode = await UserCode.findOne({ emailcode: emailcode });
 
-    if (dbCode) {
-      res.status(409);
-      res.json({
-        error: "Conflict",
-        description: "The Email is already in use"
+      if (dbCode) {
+        res.status(409);
+        res.json({
+          error: "Conflict",
+          description: "The Email is already in use"
+        });
+        return;
+      }
+
+      await UserCode.create({
+        created: Date(),
+        emailcode: emailcode,
+        code: registerCode,
+        token: registerToken,
+        verified: false
       });
-      return;
-    }
 
-    await UserCode.create({
-      created: Date(),
-      emailcode: emailcode,
-      code: registerCode,
-      token: registerToken,
-      verified: false
-    });
+      const mailStatusCode = await sendVerificationMessage(
+        emailcode + "@student.kit.edu",
+        registerCode
+      );
 
-    const mailStatusCode = await sendVerificationMessage(
-      emailcode + "@student.kit.edu",
-      registerCode
-    );
-
-    if (mailStatusCode === 500) {
-      res.status(500);
-      res.json({
-        error: "Internal Server Error: Mail",
-        description: "An internal Error occured. Perhaps the provided mail address was incorrect."
-      });
-      return;
+      if (mailStatusCode === 500) {
+        res.status(500);
+        res.json({
+          error: "Internal Server Error: Mail",
+          description: "An internal Error occured. Perhaps the provided mail address was incorrect."
+        });
+        return;
+      } else {
+        res.status(200);
+        res.json({
+          token: registerToken
+        });
+      }
     } else {
-      res.status(200);
+      res.status(400);
       res.json({
-        token: registerToken
+        error: "Bad Request",
+        description: "Incomplete request"
       });
     }
-  } else {
-    res.status(400);
+  } catch (err) {
+    console.error(err);
+    res.status(500);
     res.json({
-      error: "Bad Request",
-      description: "Incomplete request"
+      error: "Internal Sever Error",
+      description: err
     });
   }
 });
 
 router.post("/verify", async (req, res) => {
-  if (req.body.hasOwnProperty("authtoken") && req.body.hasOwnProperty("authcode")) {
-    const authtoken = req.body.authtoken;
-    const authcode = req.body.authcode;
+  try {
+    if (req.body.hasOwnProperty("authtoken") && req.body.hasOwnProperty("authcode")) {
+      const authtoken = req.body.authtoken;
+      const authcode = req.body.authcode;
 
-    const validCode = await UserCode.findOne({ token: authtoken, code: authcode });
+      const validCode = await UserCode.findOne({ token: authtoken, code: authcode });
 
-    if (validCode) {
-      // The token and code match
-      UserCode.updateOne({ token: authtoken, code: authcode }, { verified: true });
+      if (validCode) {
+        // The token and code match
+        UserCode.updateOne({ token: authtoken, code: authcode }, { verified: true });
 
-      res.status(200);
-      res.json({
-        success: true
-      });
+        res.status(200);
+        res.json({
+          success: true
+        });
+      } else {
+        res.status(401);
+        res.json({
+          error: "Unauthorized",
+          description: "The provided code seems to be invalid"
+        });
+      }
     } else {
-      res.status(401);
+      res.status(400);
       res.json({
-        error: "Unauthorized",
-        description: "The provided code seems to be invalid"
+        error: "Bad Request",
+        description: "Incomplete request"
       });
     }
-  } else {
-    res.status(400);
+  } catch (err) {
+    console.error(err);
+    res.status(500);
     res.json({
-      error: "Bad Request",
-      description: "Incomplete request"
+      error: "Internal Sever Error",
+      description: err
     });
   }
 });
 
 router.post("/register", async (req, res) => {
-  // Check if the request is properly formatted
-  if (
-    req.body.hasOwnProperty("username") &&
-    req.body.hasOwnProperty("password") &&
-    req.body.hasOwnProperty("surname") &&
-    req.body.hasOwnProperty("name") &&
-    req.body.hasOwnProperty("email") &&
-    req.body.hasOwnProperty("authtoken")
-  ) {
-    // Request Data
-    const username = req.body.username;
-    const password = req.body.password;
-    const surname = req.body.surname;
-    const name = req.body.name;
-    const email = req.body.email;
-    const authtoken = req.body.authtoken;
-    const salt = generateSalt(6);
+  try {
+    // Check if the request is properly formatted
+    if (
+      req.body.hasOwnProperty("username") &&
+      req.body.hasOwnProperty("password") &&
+      req.body.hasOwnProperty("surname") &&
+      req.body.hasOwnProperty("name") &&
+      req.body.hasOwnProperty("email") &&
+      req.body.hasOwnProperty("authtoken")
+    ) {
+      // Request Data
+      const username = req.body.username;
+      const password = req.body.password;
+      const surname = req.body.surname;
+      const name = req.body.name;
+      const email = req.body.email;
+      const authtoken = req.body.authtoken;
+      const salt = generateSalt(6);
 
-    const dbUserName = await User.findOne({ username: username });
+      const dbUserName = await User.findOne({ username: username });
 
-    if (dbUserName !== null) {
-      res.status(409);
-      res.json({ error: "Conflict", description: "username" });
-      return;
+      if (dbUserName !== null) {
+        res.status(409);
+        res.json({ error: "Conflict", description: "username" });
+        return;
+      }
+
+      const dbUserMail = await User.findOne({ email: email });
+
+      if (dbUserMail) {
+        res.status(409);
+        res.json({ error: "Conflict", description: "email" });
+        return;
+      }
+
+      const newAuthToken = generateRandomToken();
+
+      await User.create({
+        created: Date(),
+        email: email,
+        username: username,
+        password: CryptoJS.SHA256(password + salt).toString(),
+        surname: surname,
+        name: name,
+        token: newAuthToken,
+        salt: salt
+      });
+
+      res.status(201);
+      res.json({
+        success: true,
+        token: newAuthToken
+      });
+    } else {
+      res.status(400);
+      res.json({
+        error: "Bad Request",
+        description: "Incomplete request"
+      });
     }
-
-    const dbUserMail = await User.findOne({ email: email });
-
-    if (dbUserMail) {
-      res.status(409);
-      res.json({ error: "Conflict", description: "email" });
-      return;
-    }
-
-    const newAuthToken = generateRandomToken();
-
-    await User.create({
-      created: Date(),
-      email: email,
-      username: username,
-      password: CryptoJS.SHA256(password + salt).toString(),
-      surname: surname,
-      name: name,
-      token: newAuthToken,
-      salt: salt
-    });
-
-    res.status(201);
+  } catch (err) {
+    console.error(err);
+    res.status(500);
     res.json({
-      success: true,
-      token: newAuthToken
-    });
-  } else {
-    res.status(400);
-    res.json({
-      error: "Bad Request",
-      description: "Incomplete request"
+      error: "Internal Server Error",
+      description: err
     });
   }
 });
