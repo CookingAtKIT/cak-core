@@ -49,7 +49,7 @@ export function loadConfig(): Config {
 export function minioConfig(): MinioConfiguration {
   const config = {
     endPoint: process.env.MINIO_ENDPOINT || "",
-    port: process.env.MINIO_PORT || 9000,
+    port: Number(process.env.MINIO_PORT) || 9000,
     useSSL: process.env.MINIO_USE_SSL || true,
     accessKey: process.env.MINIO_ACCESS_KEY || "",
     secretKey: process.env.MINIO_SECRET_KEY || ""
@@ -61,7 +61,7 @@ export function minioConfig(): MinioConfiguration {
 export function mongoConfig(): MongoConfiguration {
   const config = {
     server: process.env.MONGO_ENDPOINT || "localhost",
-    port: process.env.MONGO_PORT || 27017,
+    port: Number(process.env.MONGO_PORT) || 27017,
     path: process.env.MONGO_PATH || "/",
     retryRewrites: process.env.MONGO_RETRY_WRITES || true,
     username: process.env.MONGO_USERNAME || "",
@@ -80,7 +80,7 @@ export function mailConfig() {
       pass: process.env.MAIL_SMTP_PASSWORD || ""
     },
     senderAddress:
-      process.env.MAIL_SENDERADDRESS || "noreply@" + (process.env.MAIL_SMTP_SERVER || "")
+      process.env.MAIL_SENDER_ADDRESS || "noreply@" + (process.env.MAIL_SMTP_SERVER || "")
   };
 
   return config;
