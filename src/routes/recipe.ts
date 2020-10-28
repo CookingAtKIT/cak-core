@@ -7,68 +7,73 @@ import { IComment } from "../models/comment.types";
 import { User } from "../models/user.schema";
 const router = Router();
 
-router.get("/:id", (req, res) => {
-  const recipeId = req.params.id;
+router.get("/:id", async (req, res) => {
+  try {
+    const recipeId = req.params.id;
 
-  Recipe.findOne({ _id: Types.ObjectId(recipeId) })
-    .populate("author")
-    .populate("ingredients.ingredient")
-    .populate("steps.img")
-    .populate("comments")
-    .populate("comments.author")
-    .exec((err, recipe) => {
-      if (err) {
-        res.status(500);
-        res.json({
-          error: "Internal Server Error",
-          description: `Error fetching information for ${recipeId}`
-        });
-        res.end();
-      }
-    })
-    .then((recipe) => {
-      if (recipe == null) {
-        res.status(404);
-        res.json({ error: "Not Found", description: `Recipe with ID ${recipeId} not found` });
-        res.end();
-      } else {
-        const comments: { author: string; body: string; likes: number; images: string[] }[] = [];
+    Recipe.findOne({ _id: Types.ObjectId(recipeId) })
+      .populate("author")
+      .populate("ingredients.ingredient")
+      .populate("steps.img")
+      .populate("comments")
+      .populate("comments.author")
+      .exec((err, recipe) => {
+        if (err) {
+          res.status(500);
+          res.json({
+            error: "Internal Server Error",
+            description: `Error fetching information for ${recipeId}`
+          });
+          res.end();
+        }
+      })
+      .then((recipe) => {
+        if (recipe == null) {
+          res.status(404);
+          res.json({ error: "Not Found", description: `Recipe with ID ${recipeId} not found` });
+          res.end();
+        } else {
+          const comments: { author: string; body: string; likes: number; images: string[] }[] = [];
 
-        for (const comment of recipe.comments as IComment[]) {
-          const images: string[] = [];
+          for (const comment of recipe.comments as IComment[]) {
+            const images: string[] = [];
 
-          for (const img of comment.imgs as Types.ObjectId[]) {
-            images.push(Image.generateLink(img));
+            for (const img of comment.imgs as Types.ObjectId[]) {
+              images.push(Image.generateLink(img));
+            }
+
+            comments.push({
+              author: (comment.author as IUser).username,
+              body: comment.message,
+              likes: comment.likes.length,
+              images
+            });
           }
 
-          comments.push({
-            author: (comment.author as IUser).username,
-            body: comment.message,
-            likes: comment.likes.length,
-            images
-          });
+          const response = {
+            id: recipe._id.toHexString(),
+            public: recipe.public,
+            flags: recipe.flags.length,
+            title: recipe.title,
+            author: (recipe.author as IUser).username,
+            lastEdit: recipe.edited ? recipe.edited.getTime() : 0,
+            thumbnail: Image.generateLink(recipe.thumbnail as Types.ObjectId),
+            ingredients: recipe.ingredients,
+            steps: recipe.steps,
+            likes: recipe.likes.length,
+            portions: recipe.portions,
+            comments
+          };
+
+          res.status(200);
+          res.json(response);
         }
-
-        const response = {
-          id: recipe._id.toHexString(),
-          public: recipe.public,
-          flags: recipe.flags.length,
-          title: recipe.title,
-          author: (recipe.author as IUser).username,
-          lastEdit: recipe.edited ? recipe.edited.getTime() : 0,
-          thumbnail: Image.generateLink(recipe.thumbnail as Types.ObjectId),
-          ingredients: recipe.ingredients,
-          steps: recipe.steps,
-          likes: recipe.likes.length,
-          portions: recipe.portions,
-          comments
-        };
-
-        res.status(200);
-        res.json(response);
-      }
-      res.end();
-    });
+        res.end();
+      });
+  } catch (err) {
+    res.status(500);
+    res.json({ error: "Internal Server Error", description: err });
+  }
 });
 
 router.post("/edit/:id", async (req, res) => {
