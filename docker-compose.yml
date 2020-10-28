@@ -31,7 +31,7 @@ services:
       - minio
     networks:
       caknet:
-        ipv4_address: "172.16.238.2"
+        ipv4_address: ${WEB_ENDPOINT}
   mongo:
     image: mongo
     hostname: mongo
@@ -42,7 +42,7 @@ services:
     - mongoData:/data/db
     networks:
       caknet:
-        ipv4_address: "172.16.238.3"
+        ipv4_address: ${MONGO_ENDPOINT}
   minio:
     image: minio/minio
     hostname: minio
@@ -58,7 +58,7 @@ services:
       retries: 3
     networks:
       caknet:
-        ipv4_address: "172.16.238.4"
+        ipv4_address: ${MINIO_ENDPOINT}
 volumes:
   minioData: {}
   mongoData: {}
