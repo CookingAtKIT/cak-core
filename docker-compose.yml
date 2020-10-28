@@ -9,6 +9,20 @@ services:
   web:
     build: .
     hostname: cakCore
+    environment:
+      PORT: ${PORT}
+      HOSTNAME: ${HOSTNAME}
+      MONGO_ENDPOINT: ${MONGO_ENDPOINT}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_PATH: ${MONGO_PATH}
+      MONGO_RETRY_WRITES: ${MONGO_RETRY_WRITES}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_PORT: ${MINIO_PORT}
+      MINIO_USE_SSL: ${MINIO_USE_SSL}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     ports:
       - "2999:2999"
     volumes:
@@ -22,8 +36,8 @@ services:
     image: mongo
     hostname: mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: key
-      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     volumes:
     - mongoData:/data/db
   networks:
@@ -35,8 +49,8 @@ services:
     volumes:
     - minioData:/data
     environment:
-      MINIO_ACCESS_KEY: key
-      MINIO_SECRET_KEY: secret
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 30s
