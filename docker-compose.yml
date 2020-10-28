@@ -1,10 +1,11 @@
 version: "3.8"
 networks:
-  cak-net:
+  caknet:
+    driver: bridge
     ipam:
       driver: default
       config:
-        subnet: "172.16.238.0/29"
+      - subnet: "172.16.238.0/29"
 services:
   web:
     build: .
@@ -25,13 +26,12 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     ports:
       - "2999:2999"
-    volumes:
     links:
       - mongo
       - minio
     networks:
-      cak-net:
-        - ipv4_address: "172.16.238.1"
+      caknet:
+        ipv4_address: "172.16.238.2"
   mongo:
     image: mongo
     hostname: mongo
@@ -40,9 +40,9 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     volumes:
     - mongoData:/data/db
-  networks:
-    cak-net:
-      - ipv4_address: "172.16.238.2"
+    networks:
+      caknet:
+        ipv4_address: "172.16.238.3"
   minio:
     image: minio/minio
     hostname: minio
@@ -57,8 +57,8 @@ services:
       timeout: 20s
       retries: 3
     networks:
-      cak-net:
-        - ipv4_address: "172.16.238.3"
+      caknet:
+        ipv4_address: "172.16.238.4"
 volumes:
   minioData: {}
   mongoData: {}
