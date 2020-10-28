@@ -32,6 +32,8 @@ services:
     networks:
       caknet:
         ipv4_address: ${WEB_ENDPOINT}
+    restart_policy:
+      condition: on-failure
   mongo:
     image: mongo
     hostname: mongo
