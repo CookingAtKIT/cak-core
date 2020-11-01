@@ -10,6 +10,9 @@ services:
   web:
     build: .
     hostname: cakCore
+    deploy:
+      restart_policy:
+        condition: on-failure
     environment:
       PORT: ${PORT}
       HOSTNAME: ${HOSTNAME}
