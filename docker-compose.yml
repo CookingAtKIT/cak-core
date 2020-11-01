@@ -53,6 +53,7 @@ services:
     hostname: minio
     volumes:
     - minioData:/data
+    command: server /data
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
