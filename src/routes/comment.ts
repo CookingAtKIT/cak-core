@@ -5,6 +5,51 @@ import { User } from "../models/user.schema";
 
 const router = Router();
 
+router.post("/:id/comment/:cid/like", async (req, res) => {
+  try {
+    const request: { token: string; set: boolean } = req.body;
+    if ("token" in request && "set" in request) {
+      const token = request.token;
+      const commentId = req.params.cid;
+      const user = await User.findOne({ token });
+      const comment = await Comment.findById(commentId);
+
+      if (!user) {
+        res.status(401);
+        res.json({ error: "Unauthorized", description: "User token invalid" });
+        return;
+      }
+
+      if (!comment) {
+        res.status(404);
+        res.json({ error: "Not Found", description: `No comment with id ${commentId} found` });
+        return;
+      }
+
+      if (request.set) {
+        // Set the like for this user
+        if (!comment.likes.includes(user._id)) comment.likes.push(user._id);
+        await comment.save();
+        res.status(200);
+        res.json({ likes: comment.likes.length });
+      } else {
+        // Unset the like for this user
+        const i = comment.likes.indexOf(user._id);
+        comment.likes.splice(i, 1);
+        await comment.save();
+        res.status(200);
+        res.json({ likes: comment.likes.length });
+      }
+    } else {
+      res.status(400);
+      res.json({ error: "Malformed request", description: "Mandatory keys not provided" });
+    }
+  } catch (e) {
+    res.status(500);
+    res.json({ error: "Internal Server Error", description: e.toString() });
+  }
+});
+
 router.post("/:id/comment/:cid/edit", async (req, res) => {
   try {
     const request: { token: string; message?: string; delete?: boolean } = req.body;
