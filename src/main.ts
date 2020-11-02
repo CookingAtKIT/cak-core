@@ -9,6 +9,7 @@ import uploadRouter from "./routes/upload";
 import recipeRouter from "./routes/recipe";
 import authRouter from "./routes/auth";
 import landingRouter from "./routes/index";
+import { createModels } from "./structs/database";
 
 const app = express();
 const config = loadConfig();
@@ -22,6 +23,8 @@ app.use("/docker", dockerRouter);
 app.use("/upload", uploadRouter);
 app.use("/recipe", recipeRouter);
 app.use("/", landingRouter);
+
+createModels();
 
 app.listen(config.port, () => {
   console.log("Server listening on port " + config.port);
