@@ -2,13 +2,13 @@ import { Router } from "express";
 import { Recipe } from "../models/recipe.schema";
 import { Types } from "mongoose";
 import { IUser } from "../models/user.types";
-import { IComment } from "../models/comment.types";
+import { IComment, ICommentClean } from "../models/comment.types";
 import { User } from "../models/user.schema";
 import commentRouter from "./comment";
 import { Image } from "../models/image.schema";
 const router = Router();
 
-router.use("/:id/comment", commentRouter);
+router.use(commentRouter);
 
 router.get("/:id", async (req, res) => {
   try {
@@ -21,13 +21,13 @@ router.get("/:id", async (req, res) => {
       .populate("comments")
       .populate("comments.author")
       .exec()
-      .then((recipe) => {
+      .then(async (recipe) => {
         if (!recipe) {
           res.status(404);
           res.json({ error: "Not Found", description: `Recipe with ID ${recipeId} not found` });
           res.end();
         } else {
-          const comments: { author: string; body: string; likes: number; images: string[] }[] = [];
+          const comments: ICommentClean[] = [];
 
           for (const comment of recipe.comments as IComment[]) {
             const images: string[] = [];
@@ -36,12 +36,16 @@ router.get("/:id", async (req, res) => {
               images.push(Image.asLink(img));
             }
 
-            comments.push({
-              author: (comment.author as IUser).username,
-              body: comment.message,
-              likes: comment.likes.length,
-              images
-            });
+            try {
+              comments.push(await comment.clean());
+            } catch (e) {
+              res.status(500);
+              res.json({
+                error: "Internal Server Error",
+                description: "Error while resolving comment: " + e.toString()
+              });
+              return;
+            }
           }
 
           const response = {

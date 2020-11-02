@@ -5,7 +5,7 @@ import { User } from "../models/user.schema";
 
 const router = Router();
 
-router.post("/create", async (req, res) => {
+router.post("/:id/comment/create", async (req, res) => {
   try {
     const request: { token: string; message: string } = req.body;
     if ("token" in request && "message" in request) {
