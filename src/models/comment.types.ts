@@ -3,6 +3,7 @@ import { IImage } from "./image.types";
 import { IUser } from "./user.types";
 
 export interface ICommentClean {
+  id: string;
   author: string;
   message: string;
   likes: number;

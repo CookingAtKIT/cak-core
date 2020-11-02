@@ -209,7 +209,7 @@ router.post("/:id/like", async (req, res) => {
           res.json({ likes: recipe.likes.length });
         } else {
           // Unset the like for this user
-          const i = recipe.likes.findIndex(uploader._id);
+          const i = recipe.likes.indexOf(uploader._id);
           recipe.likes.splice(i, 1);
           await recipe.save();
           res.status(200);
@@ -230,7 +230,10 @@ router.post("/:id/like", async (req, res) => {
     }
   } catch (e) {
     res.status(500);
-    res.json({ error: "Internal Server Error", description: "Error while querying database" });
+    res.json({
+      error: "Internal Server Error",
+      description: "Error while querying database: " + e.toString()
+    });
   }
 });
 

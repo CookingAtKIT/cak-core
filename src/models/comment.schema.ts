@@ -18,6 +18,7 @@ commentSchema.method("clean", async function (this: IComment): Promise<ICommentC
   if (!author) throw new Error("Author does not exist");
 
   return {
+    id: this.id,
     author: author.username,
     imgs: imgs.map((img) => Image.asLink(img)),
     likes: this.likes.length,
