@@ -1,6 +1,9 @@
 # WebStorm Editor Configuration
 .idea
 
+# VS Code Editor Configuration
+.vscode
+
 # Transpiled Files
 out
 

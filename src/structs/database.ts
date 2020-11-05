@@ -1,6 +1,14 @@
-import mongoose, { mongo, Schema } from "mongoose";
+import mongoose from "mongoose";
 import { Client } from "minio";
 import { minioConfig as getMinioConfig, mongoConfig as getMongoConfig } from "./config";
+import { Allergen } from "../models/allergen.schema";
+import { Comment } from "../models/comment.schema";
+import { Image } from "../models/image.schema";
+import { Ingredient } from "../models/ingredient.schema";
+import { Recipe } from "../models/recipe.schema";
+import { Unit } from "../models/unit.schema";
+import { User } from "../models/user.schema";
+import { UserCode } from "../models/usercodes.schema";
 
 // MongoDB Configuration
 const mongoConfig = getMongoConfig();
@@ -35,3 +43,14 @@ export const os = new Client({
   accessKey: minioConfig.accessKey,
   secretKey: minioConfig.secretKey
 });
+
+export function createModels() {
+  Allergen;
+  Comment;
+  Image;
+  Ingredient;
+  Recipe;
+  Unit;
+  User;
+  UserCode;
+}

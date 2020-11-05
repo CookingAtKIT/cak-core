@@ -2,10 +2,13 @@ import { Router } from "express";
 import { Recipe } from "../models/recipe.schema";
 import { Types } from "mongoose";
 import { IUser } from "../models/user.types";
-import { Image } from "../structs/image";
-import { IComment } from "../models/comment.types";
+import { IComment, ICommentClean } from "../models/comment.types";
 import { User } from "../models/user.schema";
+import commentRouter from "./comment";
+import { Image } from "../models/image.schema";
 const router = Router();
+
+router.use(commentRouter);
 
 router.get("/:id", async (req, res) => {
   try {
@@ -17,47 +20,42 @@ router.get("/:id", async (req, res) => {
       .populate("steps.img")
       .populate("comments")
       .populate("comments.author")
-      .exec((err, recipe) => {
-        if (err) {
-          res.status(500);
-          res.json({
-            error: "Internal Server Error",
-            description: `Error fetching information for ${recipeId}`
-          });
-          res.end();
-        }
-      })
-      .then((recipe) => {
-        if (recipe == null) {
+      .exec()
+      .then(async (recipe) => {
+        if (!recipe) {
           res.status(404);
           res.json({ error: "Not Found", description: `Recipe with ID ${recipeId} not found` });
           res.end();
         } else {
-          const comments: { author: string; body: string; likes: number; images: string[] }[] = [];
+          const comments: ICommentClean[] = [];
 
           for (const comment of recipe.comments as IComment[]) {
             const images: string[] = [];
 
             for (const img of comment.imgs as Types.ObjectId[]) {
-              images.push(Image.generateLink(img));
+              images.push(Image.asLink(img));
             }
 
-            comments.push({
-              author: (comment.author as IUser).username,
-              body: comment.message,
-              likes: comment.likes.length,
-              images
-            });
+            try {
+              comments.push(await comment.clean());
+            } catch (e) {
+              res.status(500);
+              res.json({
+                error: "Internal Server Error",
+                description: "Error while resolving comment: " + e.toString()
+              });
+              return;
+            }
           }
 
           const response = {
-            id: recipe._id.toHexString(),
+            id: recipe._id,
             public: recipe.public,
             flags: recipe.flags.length,
             title: recipe.title,
             author: (recipe.author as IUser).username,
             lastEdit: recipe.edited ? recipe.edited.getTime() : 0,
-            thumbnail: Image.generateLink(recipe.thumbnail as Types.ObjectId),
+            thumbnail: recipe.thumbnail ? Image.asLink(recipe.thumbnail as Types.ObjectId) : null,
             ingredients: recipe.ingredients,
             steps: recipe.steps,
             likes: recipe.likes.length,
@@ -69,10 +67,18 @@ router.get("/:id", async (req, res) => {
           res.json(response);
         }
         res.end();
+      })
+      .catch((err) => {
+        res.status(500);
+        res.json({
+          error: "Internal Server Error",
+          description: `Error fetching information for ${recipeId}: ${err.toString()}`
+        });
+        res.end();
       });
   } catch (err) {
     res.status(500);
-    res.json({ error: "Internal Server Error", description: err });
+    res.json({ error: "Internal Server Error", description: err.toString() });
   }
 });
 
@@ -203,7 +209,7 @@ router.post("/:id/like", async (req, res) => {
           res.json({ likes: recipe.likes.length });
         } else {
           // Unset the like for this user
-          const i = recipe.likes.findIndex(uploader._id);
+          const i = recipe.likes.indexOf(uploader._id);
           recipe.likes.splice(i, 1);
           await recipe.save();
           res.status(200);
@@ -224,7 +230,10 @@ router.post("/:id/like", async (req, res) => {
     }
   } catch (e) {
     res.status(500);
-    res.json({ error: "Internal Server Error", description: "Error while querying database" });
+    res.json({
+      error: "Internal Server Error",
+      description: "Error while querying database: " + e.toString()
+    });
   }
 });
 
